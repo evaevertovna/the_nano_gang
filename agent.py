@@ -98,7 +98,7 @@ root_agent = Agent(
         lookup_error_code,
         possible_actions_list,
         FunctionTool(propose_correct_action, require_confirmation=confirmation_criteria),
-        evaluate_action
+        evaluate_action, google_search
     ],
 )
 # # Confirmation criteria for actions
