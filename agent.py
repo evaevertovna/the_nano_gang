@@ -71,6 +71,16 @@ def lookup_error_code(error_code: str) -> str:
     else:
         return f"No description found for error code {code}."
 
+
+def evaluate_action(error_code: str, proposed_action: str) -> bool:
+    """Checks if the proposed action matches the expected action for the scenario."""
+    data = pd.read_excel("the_nano_gang\\corpus\\dishwasher_scenarios.xlsx")
+    scenario = data.loc[data["error_code"] == error_code]
+    if scenario.empty:
+        return False
+    expected_action = scenario.iloc[0]["correct_action"].strip().lower()
+    return proposed_action.strip().lower() == expected_action
+
 # Confirmation criteria for actions
 confirmation_criteria = "Do you want to proceed with this action?"
 
@@ -82,11 +92,31 @@ root_agent = Agent(
     Ask the user troubleshoot questions until you are certain of the correct action.
     Correct action must be an action from the possible actions list.
     When you are certain propose a correct action and wait for confirmation of the user.
-    Literally state the proposed action. For example: 'proposed action: replace_motor'. 
+    Literally state the proposed action. For example: 'proposed action: replace_motor'.
     """,
     tools=[
         lookup_error_code,
         possible_actions_list,
-        FunctionTool(propose_correct_action, require_confirmation=confirmation_criteria)
+        FunctionTool(propose_correct_action, require_confirmation=confirmation_criteria),
+        evaluate_action
     ],
 )
+# # Confirmation criteria for actions
+# confirmation_criteria = "Do you want to proceed with this action?"
+#
+# root_agent = Agent(
+#     model='gemini-2.5-flash',
+#     name='technician_agent',
+#     description="Troubleshoots broken dishwashers",
+#     instruction="""You are a helpful assistant that helps to troubleshoot a broken dishwasher: the Bosch 800 series.
+#     Ask the user troubleshoot questions until you are certain of the correct action.
+#     Correct action must be an action from the possible actions list.
+#     When you are certain propose a correct action and wait for confirmation of the user.
+#     Literally state the proposed action. For example: 'proposed action: replace_motor'.
+#     """,
+#     tools=[
+#         lookup_error_code,
+#         possible_actions_list,
+#         FunctionTool(propose_correct_action, require_confirmation=confirmation_criteria)
+#     ],
+# )
